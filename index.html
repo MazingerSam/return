@@ -3,50 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>進階雲端相機</title>
+    <title>企業雲端相機系統</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; text-align: center; background: #f4f7f9; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: #333; margin-bottom: 20px; }
-        
-        /* 顯示區 */
-        #video, #preview { width: 100%; border-radius: 12px; background: #000; display: block; margin-bottom: 15px; }
-        #preview { display: none; object-fit: contain; max-height: 400px; }
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6f42c1;
+            --success-color: #28a745;
+            --bg-color: #f8f9fa;
+        }
 
-        /* 輸入框 */
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 14px; color: #666; margin-bottom: 5px; margin-left: 5px; }
-        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        body { 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            text-align: center; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: 15px; 
+        }
+
+        .container { 
+            max-width: 500px; 
+            margin: auto; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
+
+        h2 { color: #333; margin-top: 0; font-size: 22px; }
+
+        /* 輸入框樣式 */
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 14px; color: #666; margin-bottom: 8px; font-weight: 500; }
+        input[type="text"] { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; 
+            box-sizing: border-box; font-size: 16px; outline: none; transition: border 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--primary-color); }
+
+        /* 預覽區 */
+        .viewer-box { 
+            position: relative;
+            width: 100%; 
+            aspect-ratio: 4/3;
+            background: #000; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            margin-bottom: 20px;
+        }
+        #video, #preview { width: 100%; height: 100%; object-fit: cover; }
+        #preview { display: none; }
 
         /* 按鈕樣式 */
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
         button { 
-            padding: 15px; font-size: 16px; font-weight: 600; border: none; 
-            border-radius: 10px; cursor: pointer; transition: 0.2s;
+            padding: 16px; font-size: 16px; font-weight: 600; border: none; 
+            border-radius: 12px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        #capture-btn { background: #007bff; color: white; }
-        #select-btn { background: #6f42c1; color: white; }
-        #upload-btn { background: #28a745; color: white; display: none; }
-        #retry-btn { background: #eeeff0; color: #333; display: none; }
+        #capture-btn { background-color: var(--primary-color); color: white; }
+        #select-btn { background-color: var(--secondary-color); color: white; }
+        #upload-btn { background-color: var(--success-color); color: white; display: none; }
+        #retry-btn { background-color: #e9ecef; color: #495057; display: none; }
         
-        button:active { transform: scale(0.98); opacity: 0.9; }
-        button:disabled { background: #ccc !important; }
-        
-        .status-msg { color: #007bff; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+        button:active { transform: scale(0.97); opacity: 0.9; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
+
+        /* 狀態文字 */
+        #status { 
+            margin-top: 15px; font-size: 14px; color: var(--primary-color); 
+            display: none; font-weight: 500; 
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>雲端相機 & 相簿</h2>
+    <h2>雲端拍照上傳系統</h2>
     
     <div class="input-group">
-        <label>自定義檔名 (選填)</label>
-        <input type="text" id="filename-input" placeholder="例如：產品照片_01">
+        <label>專案名稱 / 檔案描述</label>
+        <input type="text" id="filename-input" placeholder="請輸入檔名 (例如：驗收照片)">
     </div>
 
-    <video id="video" autoplay playsinline></video>
-    <img id="preview" />
+    <div class="viewer-box">
+        <video id="video" autoplay playsinline></video>
+        <img id="preview" alt="照片預覽" />
+    </div>
     
     <input type="file" id="file-input" accept="image/*" style="display: none;">
     <canvas id="canvas" style="display:none;"></canvas>
@@ -54,11 +96,11 @@
     <div class="btn-group">
         <button id="capture-btn">📷 立即拍照</button>
         <button id="select-btn">🖼️ 從相簿選擇</button>
-        <button id="upload-btn">🚀 確認上傳至雲端</button>
-        <button id="retry-btn">🔄 重選/重拍</button>
+        <button id="upload-btn">🚀 確認並上傳</button>
+        <button id="retry-btn">🔄 放棄重來</button>
     </div>
     
-    <div id="status" class="status-msg">正在處理上傳，請勿關閉視窗...</div>
+    <div id="status">⏳ 正在辨識身分並上傳中...</div>
 </div>
 
 <script>
@@ -72,37 +114,23 @@
     const retryBtn = document.getElementById('retry-btn');
     const statusDiv = document.getElementById('status');
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeccZyiyD9oUlyil8JBRC5rUIfCMHtkj5FRw3e1EaVU4hFE6nMVa8o8NkZx3cyiPDt/exec"; 
+    // 🔴 請在此替換為你最新的 Google Apps Script 部署網址
+    const SCRIPT_URL = "你的_GOOGLE_APPS_SCRIPT_網址"; 
 
-    // 啟動相機
-    function startCamera() {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(stream => { video.srcObject = stream; })
-        .catch(err => console.log("相機開啟受阻，請點擊相簿選擇"));
+    // 初始化：開啟後置相機
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" }, 
+                audio: false 
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            console.error("相機啟動失敗，請使用相簿功能:", err);
+        }
     }
 
-    // 拍照按鈕
-    captureBtn.onclick = () => {
-        const canvas = document.getElementById('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        showPreview(canvas.toDataURL('image/jpeg'));
-    };
-
-    // 點擊「從相簿選擇」按鈕，觸發隱藏的 file input
-    selectBtn.onclick = () => fileInput.click();
-
-    // 處理相簿選擇後的檔案
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => showPreview(event.target.result);
-        reader.readAsDataURL(file);
-    };
-
-    // 顯示預覽畫面
+    // 功能：顯示預覽圖
     function showPreview(dataUrl) {
         preview.src = dataUrl;
         video.style.display = 'none';
@@ -114,7 +142,26 @@
         retryBtn.style.display = 'block';
     }
 
-    // 重拍/重選按鈕
+    // 1. 拍照按鈕
+    captureBtn.onclick = () => {
+        const canvas = document.getElementById('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        showPreview(canvas.toDataURL('image/jpeg', 0.8)); // 壓縮率 0.8
+    };
+
+    // 2. 相簿選擇
+    selectBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => showPreview(event.target.result);
+        reader.readAsDataURL(file);
+    };
+
+    // 3. 重試按鈕
     retryBtn.onclick = () => {
         video.style.display = 'block';
         preview.style.display = 'none';
@@ -122,15 +169,17 @@
         selectBtn.style.display = 'block';
         uploadBtn.style.display = 'none';
         retryBtn.style.display = 'none';
-        fileInput.value = ""; // 清空檔案選擇
+        fileInput.value = ""; 
     };
 
-    // 上傳至 Google Drive
+    // 4. 上傳按鈕 (核心功能)
     uploadBtn.onclick = () => {
         const base64Data = preview.src.split(',')[1];
-        const customName = fileNameInput.value.trim() || "Upload";
-        const finalFileName = customName + "_" + new Date().getTime() + ".jpg";
+        const description = fileNameInput.value.trim() || "現場照片";
+        const dateStr = new Date().toLocaleString('zh-TW', { hour12: false }).replace(/\//g, '-');
+        const finalFileName = `${description}_${dateStr}.jpg`;
 
+        // UI 狀態鎖定
         uploadBtn.disabled = true;
         retryBtn.disabled = true;
         statusDiv.style.display = 'block';
@@ -146,20 +195,27 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
-                alert("✅ 上傳成功！");
-                location.reload();
+                alert(`✅ 上傳成功！\n記錄帳號：${data.user}\n檔案已存入 Google Drive。`);
+                location.reload(); 
             } else {
-                alert("❌ 錯誤: " + data.message);
+                alert("❌ 上傳失敗: " + data.message);
+                uploadBtn.disabled = false;
+                retryBtn.disabled = false;
             }
         })
-        .catch(err => alert("網路連線錯誤"))
-        .finally(() => {
+        .catch(err => {
+            alert("❌ 連線錯誤，請確認網路或登入狀態");
             uploadBtn.disabled = false;
+            retryBtn.disabled = false;
+        })
+        .finally(() => {
             statusDiv.style.display = 'none';
         });
     };
 
+    // 進入頁面自動啟動相機
     startCamera();
 </script>
+
 </body>
 </html>
