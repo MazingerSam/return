@@ -3,220 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>企業雲端相機系統v1</title>
+    <title>企業級產品紀錄系統</title>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6f42c1;
-            --success-color: #28a745;
-            --bg-color: #f8f9fa;
-        }
-
-        body { 
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            text-align: center; 
-            background-color: var(--bg-color); 
-            margin: 0; 
-            padding: 15px; 
-        }
-
-        .container { 
-            max-width: 500px; 
-            margin: auto; 
-            background: white; 
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-        }
-
-        h2 { color: #333; margin-top: 0; font-size: 22px; }
-
-        /* 輸入框樣式 */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 14px; color: #666; margin-bottom: 8px; font-weight: 500; }
-        input[type="text"] { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; 
-            box-sizing: border-box; font-size: 16px; outline: none; transition: border 0.3s;
-        }
-        input[type="text"]:focus { border-color: var(--primary-color); }
-
-        /* 預覽區 */
-        .viewer-box { 
-            position: relative;
-            width: 100%; 
-            aspect-ratio: 4/3;
-            background: #000; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            margin-bottom: 20px;
-        }
-        #video, #preview { width: 100%; height: 100%; object-fit: cover; }
-        #preview { display: none; }
-
-        /* 按鈕樣式 */
-        .btn-group { display: flex; flex-direction: column; gap: 12px; }
-        button { 
-            padding: 16px; font-size: 16px; font-weight: 600; border: none; 
-            border-radius: 12px; cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        #capture-btn { background-color: var(--primary-color); color: white; }
-        #select-btn { background-color: var(--secondary-color); color: white; }
-        #upload-btn { background-color: var(--success-color); color: white; display: none; }
-        #retry-btn { background-color: #e9ecef; color: #495057; display: none; }
-        
-        button:active { transform: scale(0.97); opacity: 0.9; }
-        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
-
-        /* 狀態文字 */
-        #status { 
-            margin-top: 15px; font-size: 14px; color: var(--primary-color); 
-            display: none; font-weight: 500; 
-        }
+        :root { --main: #007bff; --success: #28a745; --bg: #f4f7f6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .card { max-width: 480px; margin: auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { font-size: 20px; color: #333; }
+        .form-item { text-align: left; margin-bottom: 15px; }
+        label { font-size: 14px; font-weight: 600; color: #444; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .viewer { width: 100%; border-radius: 12px; background: #000; margin-bottom: 10px; overflow: hidden; aspect-ratio: 4/3; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .previews { display: flex; gap: 8px; margin: 10px 0; }
+        .p-box { flex: 1; aspect-ratio: 1/1; background: #eee; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
+        .p-box img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+        button { padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        #cam-btn { background: var(--main); color: white; }
+        #save-btn { background: var(--success); color: white; display: none; }
+        #clear-btn { background: #6c757d; color: white; display: none; }
+        button:active { transform: scale(0.98); }
+        .status { color: var(--main); font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>雲端拍照上傳系統</h2>
+<div class="card">
+    <h2>📸 雲端驗收管理系統</h2>
     
-    <div class="input-group">
-        <label>專案名稱 / 檔案描述</label>
-        <input type="text" id="filename-input" placeholder="請輸入檔名 (例如：驗收照片)">
+    <div class="form-item">
+        <label>產品名稱 / 編號</label>
+        <input type="text" id="p-name" placeholder="請輸入產品名稱">
+    </div>
+    <div class="form-item">
+        <label>數量 / 備註</label>
+        <textarea id="p-note" rows="2" placeholder="請輸入相關說明..."></textarea>
     </div>
 
-    <div class="viewer-box">
-        <video id="video" autoplay playsinline></video>
-        <img id="preview" alt="照片預覽" />
-    </div>
+    <div class="viewer"><video id="vid" autoplay playsinline></video></div>
     
-    <input type="file" id="file-input" accept="image/*" style="display: none;">
-    <canvas id="canvas" style="display:none;"></canvas>
+    <div class="previews">
+        <div class="p-box"></div><div class="p-box"></div><div class="p-box"></div>
+    </div>
 
-    <div class="btn-group">
-        <button id="capture-btn">📷 立即拍照</button>
-        <button id="select-btn">🖼️ 從相簿選擇</button>
-        <button id="upload-btn">🚀 確認並上傳</button>
-        <button id="retry-btn">🔄 放棄重來</button>
+    <div class="btn-stack">
+        <button id="cam-btn">📷 拍照 / 選取 (最多3張)</button>
+        <button id="save-btn">🚀 立即上傳並紀錄</button>
+        <button id="clear-btn">🔄 全部清除</button>
     </div>
     
-    <div id="status">⏳ 正在辨識身分並上傳中...</div>
+    <div id="loading" class="status">⏳ 正在處理分類存檔與試算表...</div>
+    <input type="file" id="files" accept="image/*" multiple style="display:none">
+    <canvas id="canvas" style="display:none"></canvas>
 </div>
 
 <script>
-    const video = document.getElementById('video');
-    const preview = document.getElementById('preview');
-    const fileInput = document.getElementById('file-input');
-    const fileNameInput = document.getElementById('filename-input');
-    const captureBtn = document.getElementById('capture-btn');
-    const selectBtn = document.getElementById('select-btn');
-    const uploadBtn = document.getElementById('upload-btn');
-    const retryBtn = document.getElementById('retry-btn');
-    const statusDiv = document.getElementById('status');
+    const vid = document.getElementById('vid');
+    const pBoxes = document.querySelectorAll('.p-box');
+    const fInput = document.getElementById('files');
+    const camBtn = document.getElementById('cam-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const loading = document.getElementById('loading');
 
-    // 🔴 請在此替換為你最新的 Google Apps Script 部署網址
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwusY8Wvw3yuHC86-Mtr5Vtuef0wukpd9GFPPtlP0-1V-X9CW0nmHG1F28wEE5sdMJJ/exec"; 
+    let queue = [];
+    // 🔴 請確保此處為最新的部署網址
+    const API = "您的_GOOGLE_APPS_SCRIPT_網址"; 
 
-    // 初始化：開啟後置相機
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" }, 
-                audio: false 
-            });
-            video.srcObject = stream;
-        } catch (err) {
-            console.error("相機啟動失敗，請使用相簿功能:", err);
-        }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(s => vid.srcObject = s).catch(() => console.log("切換相簿模式"));
+
+    function render() {
+        pBoxes.forEach((b, i) => b.innerHTML = queue[i] ? `<img src="${queue[i]}">` : "");
+        saveBtn.style.display = queue.length > 0 ? 'block' : 'none';
+        clearBtn.style.display = queue.length > 0 ? 'block' : 'none';
+        camBtn.disabled = queue.length >= 3;
+        camBtn.innerText = queue.length >= 3 ? "已選滿 3 張" : "📷 拍照 / 選取 (最多3張)";
     }
 
-    // 功能：顯示預覽圖
-    function showPreview(dataUrl) {
-        preview.src = dataUrl;
-        video.style.display = 'none';
-        preview.style.display = 'block';
-        
-        captureBtn.style.display = 'none';
-        selectBtn.style.display = 'none';
-        uploadBtn.style.display = 'block';
-        retryBtn.style.display = 'block';
-    }
-
-    // 1. 拍照按鈕
-    captureBtn.onclick = () => {
-        const canvas = document.getElementById('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        showPreview(canvas.toDataURL('image/jpeg', 0.8)); // 壓縮率 0.8
+    camBtn.onclick = () => {
+        if(confirm("現場拍照？(取消則從相簿選取)")) {
+            const c = document.getElementById('canvas');
+            c.width = vid.videoWidth; c.height = vid.videoHeight;
+            c.getContext('2d').drawImage(vid, 0, 0);
+            queue.push(c.toDataURL('image/jpeg', 0.8));
+            render();
+        } else { fInput.click(); }
     };
 
-    // 2. 相簿選擇
-    selectBtn.onclick = () => fileInput.click();
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => showPreview(event.target.result);
-        reader.readAsDataURL(file);
-    };
-
-    // 3. 重試按鈕
-    retryBtn.onclick = () => {
-        video.style.display = 'block';
-        preview.style.display = 'none';
-        captureBtn.style.display = 'block';
-        selectBtn.style.display = 'block';
-        uploadBtn.style.display = 'none';
-        retryBtn.style.display = 'none';
-        fileInput.value = ""; 
-    };
-
-    // 4. 上傳按鈕 (核心功能)
-    uploadBtn.onclick = () => {
-        const base64Data = preview.src.split(',')[1];
-        const description = fileNameInput.value.trim() || "現場照片";
-        const dateStr = new Date().toLocaleString('zh-TW', { hour12: false }).replace(/\//g, '-');
-        const finalFileName = `${description}_${dateStr}.jpg`;
-
-        // UI 狀態鎖定
-        uploadBtn.disabled = true;
-        retryBtn.disabled = true;
-        statusDiv.style.display = 'block';
-
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                image: base64Data,
-                mimeType: "image/jpeg",
-                fileName: finalFileName
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                alert(`✅ 上傳成功！\n記錄帳號：${data.user}\n檔案已存入 Google Drive。`);
-                location.reload(); 
-            } else {
-                alert("❌ 上傳失敗: " + data.message);
-                uploadBtn.disabled = false;
-                retryBtn.disabled = false;
-            }
-        })
-        .catch(err => {
-            alert("❌ 連線錯誤，請確認網路或登入狀態");
-            uploadBtn.disabled = false;
-            retryBtn.disabled = false;
-        })
-        .finally(() => {
-            statusDiv.style.display = 'none';
+    fInput.onchange = (e) => {
+        Array.from(e.target.files).slice(0, 3 - queue.length).forEach(f => {
+            const r = new FileReader();
+            r.onload = (v) => { queue.push(v.target.result); render(); };
+            r.readAsDataURL(f);
         });
     };
 
-    // 進入頁面自動啟動相機
-    startCamera();
-</script>
+    clearBtn.onclick = () => { queue = []; render(); fInput.value = ""; };
 
+    saveBtn.onclick = () => {
+        const name = document.getElementById('p-name').value;
+        if(!name) return alert("請輸入產品名稱");
+        
+        saveBtn.disabled = true;
+        camBtn.disabled = true;
+        loading.style.display = 'block';
+
+        fetch(API, {
+            method: "POST",
+            body: JSON.stringify({
+                images: queue.map(i => i.split(',')[1]),
+                description: name,
+                note: document.getElementById('p-note').value
+            })
+        })
+        .then(res => res.json())
+        .then(d => {
+            if(d.status === "success") {
+                alert(`✅ 資料同步完成！\n記錄帳號：${d.user}\n檔案已存於「產品照片上傳區」日期資料夾中。`);
+                location.reload();
+            } else { 
+                alert("失敗：" + d.message); 
+                saveBtn.disabled = false;
+                camBtn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert("連線錯誤，請確保您在 Safari/Chrome 中開啟並已登入 Google。");
+            saveBtn.disabled = false;
+        })
+        .finally(() => loading.style.display = 'none');
+    };
+</script>
 </body>
 </html>
-
